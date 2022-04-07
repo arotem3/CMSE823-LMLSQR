@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include <iostream>
+#include <vector>
 
 inline double square(double x)
 {
@@ -20,16 +22,10 @@ class Matrix
     const unsigned long& n_rows = _nr;
     const unsigned long& n_cols = _nc;
 
-    Matrix()
-    {
-        _nr = 0;
-        _nc = 0;
-    }
+    Matrix() : _nr(0), _nc(0) {}
 
-    explicit Matrix(unsigned long m, unsigned long n)
+    explicit Matrix(unsigned long m, unsigned long n) : _nr(m), _nc(n)
     {
-        _nr = m;
-        _nc = n;
         arr = new double[m*n]{0.0};
     }
 
@@ -60,6 +56,7 @@ class Matrix
         _nc = x.size();
         _nr = x.begin()->size();
         arr = new double[_nr*_nc];
+        arr = new double[_nr*_nc];
 
         double * y = arr;
         for (auto xi = x.begin(); xi != x.end(); ++xi)
@@ -72,7 +69,7 @@ class Matrix
         delete[] arr;
         _nr = mat.n_rows;
         _nc = mat.n_cols;
-        arr = new double[mat.n_cols*mat.n_rows];
+        arr = new double[mat.size()];
         std::copy_n(mat.arr, mat.size(), arr);
 
         return *this;
@@ -137,11 +134,11 @@ class Matrix
     std::string print()
     {
         std::stringstream out;
-        out << std::fixed << std::setprecision(6);
+        out << std::setprecision(4);
         for (unsigned long i=0; i < n_rows; ++i)
             {
                 for (unsigned long j=0; j < n_cols; ++j)
-                    out << '\t' << (*this)(i,j);
+                    out << std::setw(10) << (*this)(i,j);
                 out << '\n';
             }
 

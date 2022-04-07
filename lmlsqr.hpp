@@ -8,22 +8,11 @@
 struct tausolve_helper
 {
     Matrix X1, X2;
+    
+    // for svd, work1 == 1 if b <- V.t() * b.
+    int work1;
 
-    tausolve_helper(Matrix& J, int solver)
-    {
-        if (solver == 0)
-        {
-            X1 = J; // this is for cholesky
-        }
-        else if (solver == 1) // compute svd of J
-        {
-            // fill X1 with V, fill X2 with singular values
-        }
-        else if (solver  == 2) // compute QR of J
-        {
-            // fill X1 with Q, fill X2 with R
-        }
-    }
+    tausolve_helper(Matrix& J, int solver);
     // do something
 };
 
