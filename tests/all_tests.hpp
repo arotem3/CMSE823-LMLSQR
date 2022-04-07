@@ -3,6 +3,7 @@
 
 #include "lmlsqr.hpp"
 
-bool TEST_tausolve_svd();
+int TEST_tausolve_svd();
+int TEST_tausolve_chol();
 
 #endif

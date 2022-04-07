@@ -2,7 +2,9 @@
 #include "lmlsqr.hpp"
 #include "Matrix.hpp"
 
-bool TEST_tausolve_svd()
+#include "all_tests.hpp"
+
+int TEST_tausolve_svd()
 {
     Matrix J = {{0.5, -std::sqrt(2.0), 0.5},
                 {0.5, std::sqrt(2.0), 0.5}};
@@ -20,7 +22,7 @@ bool TEST_tausolve_svd()
     bool success = norm(x - xe) < 1e-10;
 
     if (not success)
-        std::cout << "tausolve_svd() failed to compute accurate solution\n";
+        std::cout << "tausolve_svd() failed to compute accurate solution to test problem\n";
 
-    return 0;
+    return success;
 }
