@@ -18,18 +18,8 @@ bool TEST_tausolve_svd()
 
     bool success = norm(x - xe) < 1e-10;
 
+    if (not success)
+        std::cout << "tausolve_svd() failed to compute accurate solution\n";
+
     return success;
-}
-
-// g++ ./tests/tausolve_svd.cpp ./source/tausolve_helper.cpp ./source/tausolve_svd.cpp ./source/Matrix.cpp -I ./ -llapack
-
-int main()
-{
-
-    if (TEST_tausolve_svd())
-        std::cout << "tausolve_svd() passed test\n";
-    else
-        std::cout << "tausolve_svd() failed test\n";
-
-    return 0;
 }
