@@ -1,4 +1,5 @@
 #include "lmlsqr.hpp"
+#include "Matrix.hpp"
 
 // solves diag(s.^2 + tau^2)*x = b where s is a 1d vector, b is a 1d vector.
 Matrix diagonal_solve(const Matrix& s, double tau, const Matrix& b)

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "lmlsqr.hpp"
+#include "Matrix.hpp"
 
 bool TEST_tausolve_svd()
 {
