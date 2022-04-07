@@ -1,5 +1,6 @@
 #include <iostream>
 #include "lmlsqr.hpp"
+#include "Matrix.hpp"
 
 bool TEST_tausolve_svd()
 {
@@ -21,5 +22,5 @@ bool TEST_tausolve_svd()
     if (not success)
         std::cout << "tausolve_svd() failed to compute accurate solution\n";
 
-    return success;
+    return 0;
 }
