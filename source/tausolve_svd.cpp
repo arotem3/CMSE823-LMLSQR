@@ -21,7 +21,7 @@ Matrix tausolve_svd(tausolve_helper& helper, double tau, Matrix& b)
     Matrix & s = helper.X2; // for clarity
 
     if (helper.work1 == 0)
-        b = Vt * b; // set b <- V.t() * b
+        b = Vt * (helper._J.t() * b); // set b <- V.t() * b
 
     Matrix x = diagonal_solve(s, tau, b);
 

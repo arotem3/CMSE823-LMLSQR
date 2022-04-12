@@ -3,7 +3,7 @@
 extern "C" void dgesvd_(char* jobu, char * jobvt, int * m, int * n, double * a, int * lda, double * s, double * u, int * ldu, double * vt, int * ldvt, double * work, int * lwork, int * info);
 extern "C" void dgeqrf_(int * m, int * n, double * a, int * lda, double * tau, double * work, int * lwork, int * info);
 
-tausolve_helper::tausolve_helper(Matrix& J, int solver)
+tausolve_helper::tausolve_helper(Matrix& J, int solver) : _J(J)
 {
     if (solver == 0)
     {
@@ -12,19 +12,18 @@ tausolve_helper::tausolve_helper(Matrix& J, int solver)
     else if (solver == 1) // compute svd of J, X1 = V^T, X2 = S
     {
         char jobu = 'N';
-        char jobvt = 'A';
+        char jobvt = 'O';
         int m = J.n_rows;
         int n = J.n_cols;
-        double * a = J.data();
+        X1 = J;
+        double * a = X1.data();
         int lda = m;
 
         X2 = zeros(n, 1);
         double * s = X2.data();
         double * u = nullptr;
+        double * vt = nullptr;
         int ldu = 1;
-
-        X1 = zeros(n, n);
-        double * vt = X1.data();
         int ldvt = n;
 
         int lwork = -1;
@@ -47,6 +46,13 @@ tausolve_helper::tausolve_helper(Matrix& J, int solver)
 
         if (info != 0)
             throw std::runtime_error("failed to compute singular value decomposition.");
+
+        Matrix Vt = zeros(n,n);
+        for (int i=0; i < n; ++i)
+            for (int j=0; j < n; ++j)
+                Vt(i,j) = X1(i,j); // extract the top n,n submatrix of X2
+
+        X1 = std::move(Vt);
 
         delete[] work;
     }

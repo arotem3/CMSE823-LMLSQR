@@ -8,6 +8,7 @@
 struct tausolve_helper
 {
     Matrix X1, X2;
+    Matrix & _J;
     
     // for svd, work1 == 1 if b <- V.t() * b. for qr, work1 == 1 if b <- Q.t() * b
     int work1;
