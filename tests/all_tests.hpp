@@ -5,5 +5,6 @@
 
 int TEST_tausolve_svd();
 int TEST_tausolve_chol();
+int TEST_tausolve_qr();
 
 #endif

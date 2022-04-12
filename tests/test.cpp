@@ -6,6 +6,7 @@ int main()
 
     n_passed += TEST_tausolve_svd(); ++n_tests;
     n_passed += TEST_tausolve_chol(); ++n_tests;
+    n_passed += TEST_tausolve_qr(); ++n_tests;
 
     std::cout << n_passed << " / " << n_tests << " tests completed successfully.\n";
 
