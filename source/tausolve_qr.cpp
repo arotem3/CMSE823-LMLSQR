@@ -38,8 +38,8 @@ Matrix tausolve_qr(tausolve_helper& helper, double tau, Matrix& b)
     }
 
     int n = helper.X1.n_cols;
-    Matrix b1 = zeros(n, 1);
-    Matrix b2 = b;
+    Matrix b1 = b;
+    Matrix b2 = zeros(n,1);
     Matrix G = tau * eye(n);
     Matrix R = zeros(n, n);
 
@@ -50,8 +50,6 @@ Matrix tausolve_qr(tausolve_helper& helper, double tau, Matrix& b)
             R(i, j) = helper.X1(i, j);
         }
     }
-
-    std::cout << R.print() << '\n';
 
     // givens rotation
     for (int i=n-1; i >= 0; --i)
@@ -77,10 +75,7 @@ Matrix tausolve_qr(tausolve_helper& helper, double tau, Matrix& b)
             b2[i] = w2;
         }
     }
-
-    std::cout << R.print() << '\n';
-    std::cout << b1.print() << '\n';
-
+    
     // solve x = R \ b1
     char uplo = 'U';
     char trans = 'N';

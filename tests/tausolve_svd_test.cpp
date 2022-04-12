@@ -11,9 +11,13 @@ int TEST_tausolve_svd()
 
     double tau = 0.1;
 
-    Matrix xe = {{1.0, 3.14}};
+    // Matrix xe = {{1.0, 3.14}};
 
-    Matrix b = (J.t() * J + square(tau)*eye(2)) * xe;
+    // Matrix b = (J.t() * J + square(tau)*eye(2)) * xe;
+
+    Matrix b = {{1., 1., 1.}};
+
+    Matrix xe = {{0.637427298586004, 1.342770721215976}};
 
     tausolve_helper helper(J, 1);
 

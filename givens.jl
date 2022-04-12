@@ -1,11 +1,13 @@
 using LinearAlgebra
 
-m = 100
-n = 20
+m = 3
+n = 2
 τ = 0.1
 
-J = randn(m, n)
-b = randn(m)
+# J = randn(m, n)
+# b = randn(m)
+J = [0.5 0.5; -sqrt(2) sqrt(2); 0.5 0.5]
+b = [1;1;1]
 
 xe = (J'*J + τ^2 * I) \ (J'*b)
 

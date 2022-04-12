@@ -11,9 +11,13 @@ int TEST_tausolve_chol()
 
     double tau = 0.1;
 
-    Matrix xe = {{1.0, 3.14}};
+    Matrix b = {{1., 1., 1.}};
 
-    Matrix b = (J.t() * J + square(tau)*eye(2)) * xe;
+    Matrix xe = {{0.637427298586004, 1.342770721215976}};
+
+    // Matrix xe = {{1.0, 3.14}};
+
+    // Matrix b = (J.t() * J + square(tau)*eye(2)) * xe;
 
     tausolve_helper helper(J, 0);
 

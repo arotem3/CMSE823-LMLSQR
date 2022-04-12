@@ -15,15 +15,9 @@ int TEST_tausolve_qr()
 
     Matrix xe = {{0.637427298586004, 1.342770721215976}};
 
-    // Matrix xe = {{1.0, 3.14}};
-
-    // Matrix b = (J.t() * J + square(tau)*eye(2)) * xe;
-
     tausolve_helper helper(J, 2);
 
     Matrix x = tausolve_qr(helper, tau, b);
-
-    std::cout << x.print() << '\n';
 
     bool success = norm(x - xe) < 1e-10;
 
