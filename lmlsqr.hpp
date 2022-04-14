@@ -1,6 +1,7 @@
 #ifndef LMLSQR_HPP
 #define LMLSQR_HPP
 
+#include <iostream>
 #include <limits>
 #include <cmath>
 #include "Matrix.hpp"
@@ -57,9 +58,10 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
 {
     tau_solver my_tau_solve(J, r);
 
-    double tau = 0;
+    double tau = 1e-2;
     double tau_old;
-    double eps = std::sqrt(std::numeric_limits<double>::epsilon());
+    //double eps = std::sqrt(std::numeric_limits<double>::epsilon());
+    double eps = 1e-5;
 
     double g;
     double g_forward;
@@ -68,7 +70,7 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
     Matrix s;
     Matrix s_forward;
 
-    int max_iter = 1000;
+    int max_iter = 30;
     int i = 0;
     while (i < max_iter) { 
         s = my_tau_solve(tau);
@@ -77,6 +79,8 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
         g = (1/norm(s)) - (1/delta);
         g_forward = (1/norm(s_forward)) - (1/delta);
         g_derivative = (g_forward-g)/eps;
+
+        //std::cout << "Iter " << i << "; tau = " << tau << "; g' = " << g_derivative << "\n";
 
         tau_old = tau;
         tau = tau_old - (g/g_derivative);
