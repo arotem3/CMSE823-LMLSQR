@@ -1,55 +1,83 @@
 #include "lmlsqr.hpp"
 
+extern "C" void dgeqrf_(int * m, int * n, double * a, int * lda, double * tau, double * work, int * lwork, int * info);
 extern "C" void dormqr_(char * side, char * trans, int * m, int * n, int * k, double * a, int * lda, double * tau, double * c, int * ldc, double * work, int * lwork, int * info);
 extern "C" void dtrtrs_(char * uplo, char * trans, char * diag, int * n, int * nrhs, double * a, int * lda, double * b, int * ldb, int * info);
 
-Matrix tausolve_qr(tausolve_helper& helper, double tau, Matrix& b)
+TauSolverQR::TauSolverQR(const Matrix& J, const Matrix& b)
 {
-    if (helper.work1 != 1)
+    QR = J;
+    int m = J.n_rows;
+    int n = J.n_cols;
+    int lda = m;
+    qr_tau = zeros(n, 1);
+    int lwork = -1;
+    double * work = new double[n];
+    int info = 0;
+
+    // workspace query
+    dgeqrf_(&m, &n, QR.data(), &lda, qr_tau.data(), work, &lwork, &info);
+
+    lwork = work[0];
+    if (lwork > n)
     {
-        char side = 'L';
-        char trans = 'T';
-        int m = helper.X1.n_rows;
-        int n = 1;
-        int k = helper.X1.n_cols;
-        double * a = helper.X1.data();
-        int lda = m;
-        double * tau_qr = helper.X2.data();
-        double * c = b.data();
-        int ldc = m;
-        int lwork = -1;
-        double * work = new double[n];
-        int info = 0;
-
-        // query workspace
-        dormqr_(&side, &trans, &m, &n, &k, a, &lda, tau_qr, c, &ldc, work, &lwork, &info);
-
-        lwork = int(work[0]);
-        if (lwork > n)
-        {
-            delete[] work;
-            work = new double[lwork];
-        }
-
-        dormqr_(&side, &trans, &m, &n, &k, a, &lda, tau_qr, c, &ldc, work, &lwork, &info);
-
         delete[] work;
-        helper.work1 = 1;
+        work = new double[lwork];
     }
 
-    int n = helper.X1.n_cols;
-    Matrix b1 = b;
-    Matrix b2 = zeros(n,1);
-    Matrix G = tau * eye(n);
-    Matrix R = zeros(n, n);
+    // actual decomp
+    dgeqrf_(&m, &n, QR.data(), &lda, qr_tau.data(), work, &lwork, &info);
+
+    if (info != 0)
+        throw std::runtime_error("failed to compute QR decomposition.");
+
+    // apply Q.t() * b
+    char side = 'L';
+    char trans = 'T';
+    n = 1;
+    int k = QR.n_cols;
+    int ldc = m;
+    int nwork = lwork;
+    lwork = -1;
+    info = 0;
+
+    Matrix bb = b;
+
+    // query workspace
+    dormqr_(&side, &trans, &m, &n, &k, QR.data(), &lda, qr_tau.data(), bb.data(), &ldc, work, &lwork, &info);
+
+    lwork = int(work[0]);
+    if (lwork > nwork)
+    {
+        delete[] work;
+        work = new double[lwork];
+    }
+
+    dormqr_(&side, &trans, &m, &n, &k, QR.data(), &lda, qr_tau.data(), bb.data(), &ldc, work, &lwork, &info);
+
+    delete[] work;
+
+    // resize b to correct size.
+    _b = zeros(QR.n_cols,1);
+    std::copy_n(bb.data(), QR.n_cols, _b.data());
+
+    // fill initialize R, G
+    n = QR.n_cols;
+    R = zeros(n, n);
+    G = zeros(n, n);
+    b2 = zeros(n, 1);
+}
+
+Matrix TauSolverQR::operator()(double tau)
+{
+    int n = QR.n_cols;
+    b1 = _b;
+    b2.fill(0.0);
+    G.eye(); G *= tau;
 
     for (int i=0; i < n; ++i)
-    {
         for (int j=i; j < n; ++j)
-        {
-            R(i, j) = helper.X1(i, j);
-        }
-    }
+            R(i, j) = QR(i, j);
 
     // givens rotation
     for (int i=n-1; i >= 0; --i)
@@ -61,7 +89,7 @@ Matrix tausolve_qr(tausolve_helper& helper, double tau, Matrix& b)
             double s = -G(i, j) / h;
 
             double w1, w2;
-            for (int k=0; k < n; ++k)
+            for (int k=i; k < n; ++k)
             {
                 w1 = c * R(j, k) - s * G(i, k);
                 w2 = s * R(j, k) + c * G(i, k);
@@ -81,13 +109,11 @@ Matrix tausolve_qr(tausolve_helper& helper, double tau, Matrix& b)
     char trans = 'N';
     char diag = 'N';
     int nrhs = 1;
-    double * a = R.data();
     int lda = n;
-    double * rhs = b1.data();
     int ldb = n;
     int info = 0;
 
-    dtrtrs_(&uplo, &trans, &diag, &n, &nrhs, a, &lda, rhs, &ldb, &info);
+    dtrtrs_(&uplo, &trans, &diag, &n, &nrhs, R.data(), &lda, b1.data(), &ldb, &info);
 
     if (info != 0)
         throw std::runtime_error("Failed to solve R*x = b, R may be singular?");

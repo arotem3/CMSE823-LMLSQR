@@ -15,9 +15,8 @@ int TEST_tausolve_qr()
 
     Matrix xe = {{0.637427298586004, 1.342770721215976}};
 
-    tausolve_helper helper(J, 2);
-
-    Matrix x = tausolve_qr(helper, tau, b);
+    TauSolverQR solver(J, b);
+    Matrix x = solver(tau);
 
     bool success = norm(x - xe) < 1e-10;
 

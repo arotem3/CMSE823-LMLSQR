@@ -5,13 +5,17 @@ extern "C" void dposv_(char *uplo, int *n, int *nrhs, double *A, int *lda, doubl
 // solves Ax = B for B, using cholesky, decomposition, where A is
 // symmetric/hermitian positive definite
 
-// Solving (J'J + tau^2I)x = b
-Matrix tausolve_chol(tausolve_helper& helper, double tau, Matrix& b) {
-    // helper.X1 = J for cholesky
-    Matrix J = helper.X1;
-    Matrix RHS = J.t()*b;
+
+TauSolverChol::TauSolverChol(const Matrix& J, const Matrix& b) : _J(J)
+{
+    _b = J.t() * b;
+}
+
+Matrix TauSolverChol::operator()(double tau)
+{
+    Matrix RHS = _b;
     int n = RHS.n_rows;
-    Matrix LHS = (J.t()*J) + (tau*tau*eye(n));
+    Matrix LHS = (_J.t()*_J) + (square(tau)*eye(n));
 
     int nrhs = RHS.n_cols;
     char uplo = 'U'; // Store upper triangular part (although we won't use it)

@@ -66,10 +66,15 @@ class Matrix
 
     Matrix& operator=(const Matrix& mat)
     {
-        delete[] arr;
+        // delete[] arr;
+        if (size() < mat.size())
+        {
+            delete[] arr;
+            arr = new double[mat.size()];
+        }
         _nr = mat.n_rows;
         _nc = mat.n_cols;
-        arr = new double[mat.size()];
+        // arr = new double[mat.size()];
         std::copy_n(mat.arr, mat.size(), arr);
 
         return *this;
@@ -143,6 +148,31 @@ class Matrix
             }
 
         return out.str();
+    }
+
+    void fill(double x = 0.0)
+    {
+        for (double * a = arr; a != arr + size(); ++a)
+            (*a) = x;
+    }
+
+    void eye()
+    {
+        fill(0.0);
+
+        int n = std::min(_nr, _nc);
+
+        double * a = arr;
+        for (int i=0; i < n; ++i, a += _nr)
+            *(a + i) = 1.0;
+    }
+
+    Matrix& operator*=(double c)
+    {
+        for (double * a = arr; a != arr + size(); ++a)
+            (*a) *= c;
+
+        return *this;
     }
 
     private:
