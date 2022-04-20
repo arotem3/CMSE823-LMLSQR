@@ -74,7 +74,7 @@ Matrix TauSolverQR::operator()(double tau)
     b1 = _b;
     b2.fill(0.0);
     G.fill(0.0);
-    G.diag().fill(tau);
+    G.diag().fill(std::sqrt(std::abs(tau)));
 
     for (int i=0; i < n; ++i)
         for (int j=i; j < n; ++j)
