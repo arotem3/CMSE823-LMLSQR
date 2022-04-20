@@ -30,7 +30,7 @@ int TEST_trust_solve()
 
     bool success = norm(s - se) < 1e-10;
     //bool success = std::abs(norm(s) - delta) < 1e-8;
-    std::cout << "||s|| = " << norm(s) << "\n";
+    //std::cout << "||s|| = " << norm(s) << "\n";
 
     if (not success) {
         std::cout << "s: " << s.print();

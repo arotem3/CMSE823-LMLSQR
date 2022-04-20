@@ -58,7 +58,7 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
 {
     tau_solver my_tau_solve(J, r);
 
-    double tau = 1e-2;
+    double tau = 0;
     double tau_old;
     //double eps = std::sqrt(std::numeric_limits<double>::epsilon());
     double eps = 1e-5;
@@ -70,10 +70,12 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
     Matrix s;
     Matrix s_forward;
 
-    int max_iter = 30;
+    int max_iter = 10;
     int i = 0;
     while (i < max_iter) { 
         s = my_tau_solve(tau);
+        if (norm(s) <= delta)
+            break;
         s_forward = my_tau_solve(tau + eps);
 
         g = (1/norm(s)) - (1/delta);
