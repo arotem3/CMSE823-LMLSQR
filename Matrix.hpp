@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <random>
 
 inline double square(double x)
 {
@@ -278,5 +279,6 @@ Matrix vcat(const Matrix& a, const Matrix& b);
 Matrix eye(int n);
 Matrix ones(int m, int n);
 Matrix zeros(int m, int n);
+Matrix randn(int m, int n);
 
 #endif

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <chrono>
 #include "Matrix.hpp"
 
 // computes the solution to (J'*J + tau^2 * I) * x = b using Cholesky
@@ -95,5 +96,24 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
     return s;
 
 }
+
+class Timer
+{
+    public:
+    inline Timer()
+    {
+        t0 = std::chrono::system_clock::now();
+    }
+
+    inline long elapsed_time()
+    {
+        auto t1 = std::chrono::system_clock::now();
+        std::chrono::milliseconds diff = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0);
+        return diff.count();
+    }
+
+    private:
+    std::chrono::time_point<std::chrono::system_clock> t0;
+};
 
 #endif

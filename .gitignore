@@ -1,3 +1,8 @@
 a.out
 .vscode
 build
+test
+timing
+timing_chol.txt
+timing_qr.txt
+timing_svd.txt

@@ -187,6 +187,19 @@ Matrix zeros(int m, int n)
     return Matrix(m,n);
 }
 
+Matrix randn(int m, int n)
+{
+    Matrix A(m,n);
+
+    std::default_random_engine generator;
+    std::normal_distribution<double> distribution(0., 1.);
+
+    for (int i=0; i < A.size(); ++i)
+        A[i] = distribution(generator);
+
+    return A;
+}
+
 double norm(const Matrix& x)
 {
     double s = 0;
