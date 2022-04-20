@@ -73,7 +73,7 @@ Matrix TauSolverQR::operator()(double tau)
     int n = QR.n_cols;
     b1 = _b;
     b2.fill(0.0);
-    G.eye(); G *= tau;
+    G.eye(); G *= std::sqrt(std::abs(tau));
 
     for (int i=0; i < n; ++i)
         for (int j=i; j < n; ++j)
