@@ -17,7 +17,7 @@ Matrix TauSolverChol::operator()(double tau)
     Matrix RHS = _b;
     int n = RHS.n_rows;
     Matrix LHS = _A;
-    LHS.diag() += square(tau);
+    LHS.diag() += std::abs(tau);
 
     int nrhs = RHS.n_cols;
     char uplo = 'U'; // Store upper triangular part (although we won't use it)

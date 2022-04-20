@@ -9,7 +9,7 @@ int TEST_tausolve_svd()
     Matrix J = {{0.5, -std::sqrt(2.0), 0.5},
                 {0.5, std::sqrt(2.0), 0.5}};
 
-    double tau = 0.1;
+    double tau = 0.01;
 
     Matrix b = {{1., 1., 1.}};
 

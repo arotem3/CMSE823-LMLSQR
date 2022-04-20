@@ -55,7 +55,7 @@ Matrix diagonal_solve(const Matrix& s, double tau, const Matrix& b)
     double * xi = x.data();
 
     for (int i=0; i < x.size(); ++i, ++xi, ++si)
-        (*xi) /= square(*si) + square(tau);
+        (*xi) /= square(*si) + std::abs(tau);
 
     return x;
 }
