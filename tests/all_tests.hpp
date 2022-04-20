@@ -31,10 +31,11 @@ int TEST_trust_solve()
     bool success = std::abs(norm(s) - delta) < 1e-8;
     std::cout << "||s|| = " << norm(s) << "\n";
 
-    if (not success)
+    if (not success) {
         std::cout << "s: " << s.print();
         std::cout << "se: " << se.print();
         std::cout << "trust_solve() failed to compute accurate solution to test problem.\n";
+    }
 
     return success;
 
