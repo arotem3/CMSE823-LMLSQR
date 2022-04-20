@@ -15,7 +15,7 @@ class TauSolverChol
     Matrix operator()(double tau);
 
     private:
-    const Matrix & _J;
+    Matrix _A;
     Matrix _b;
 };
 

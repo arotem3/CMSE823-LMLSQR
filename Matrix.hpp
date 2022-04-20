@@ -150,35 +150,119 @@ class Matrix
         return out.str();
     }
 
-    void fill(double x = 0.0)
+    inline void fill(double x = 0.0)
     {
-        for (double * a = arr; a != arr + size(); ++a)
-            (*a) = x;
+        std::fill_n(arr, size(), x);
     }
 
-    void eye()
+    inline void eye()
     {
         fill(0.0);
-
-        int n = std::min(_nr, _nc);
-
-        double * a = arr;
-        for (int i=0; i < n; ++i, a += _nr)
-            *(a + i) = 1.0;
+        diag().fill(1.0);
     }
 
-    Matrix& operator*=(double c)
+    template <typename Func>
+    inline void for_each(Func f)
     {
-        for (double * a = arr; a != arr + size(); ++a)
-            (*a) *= c;
+        std::for_each_n(arr, size(), f);
+    }
+
+    inline Matrix& operator*=(double c)
+    {
+        std::for_each_n(arr, size(), [&](double& a) -> void {a *= c;});
+        // for (double * a = arr; a != arr + size(); ++a)
+            // (*a) *= c;
 
         return *this;
+    }
+
+    inline Matrix& operator+=(double c)
+    {
+        std::for_each_n(arr, size(), [&](double& a) -> void {a += c;});
+        return *this;
+    }
+
+    inline Matrix& operator-=(double c)
+    {
+        std::for_each_n(arr, size(), [&](double& a) -> void {a -= c;});
+        return *this;
+    }
+
+    inline Matrix& operator+=(const Matrix& b)
+    {
+        const double * bi = b.data();
+        for (double * ai = arr; ai != arr + size(); ++ai, ++bi)
+            (*ai) += (*bi);
+        return *this;
+    }
+
+    inline Matrix& operator-=(const Matrix& b)
+    {
+        const double * bi = b.data();
+        for (double * ai = arr; ai != arr + size(); ++ai, ++bi)
+            (*ai) -= (*bi);
+        return *this;
+    }
+
+    class MatrixDiagonalView
+    {
+        public:
+        const unsigned long& n_rows = _nr;
+        const unsigned long& n_cols = _nc;
+
+        explicit MatrixDiagonalView(double * a, unsigned long nr, unsigned long nc) : arr(a), _nr(nr), _nc(nc) {}
+
+        inline MatrixDiagonalView& operator*=(double c)
+        {
+            for_each([&](double& a) -> void {a *= c;});
+            return *this;
+        }
+        inline MatrixDiagonalView& operator+=(double c)
+        {
+            for_each([&](double& a) -> void {a += c;});
+            return *this;
+        }
+        inline MatrixDiagonalView& operator-=(double c)
+        {
+            for_each([&](double& a) -> void {a -= c;});
+            return *this;
+        }
+        MatrixDiagonalView& operator+=(const Matrix&);
+        MatrixDiagonalView& operator-=(const Matrix&);
+        
+        inline void fill(double c = 0.0)
+        {
+            for_each([&](double& a) -> void {a = c;});
+        }
+
+        template <typename Func>
+        void for_each(Func f)
+        {
+            int n = std::min(_nr, _nc);
+
+            double * a = arr;
+            for (int i=0; i < n; ++i, a += _nr)
+                f( *(a + i) );
+        }
+        
+        private:
+        double * arr;
+        unsigned long _nr, _nc;
+    };
+
+    inline MatrixDiagonalView diag()
+    {
+        return MatrixDiagonalView(arr, _nr, _nc);
     }
 
     private:
     double * arr = nullptr;
     unsigned long _nr, _nc;
 };
+
+void mult(Matrix&, const Matrix&, const Matrix&);
+void add(Matrix&, const Matrix&, const Matrix&);
+void subtract(Matrix&, const Matrix&, const Matrix&);
 
 Matrix operator*(const Matrix& a, const Matrix& b);
 Matrix operator*(double c, const Matrix& a);

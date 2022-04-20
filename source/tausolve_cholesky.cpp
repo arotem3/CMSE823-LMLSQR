@@ -6,8 +6,9 @@ extern "C" void dposv_(char *uplo, int *n, int *nrhs, double *A, int *lda, doubl
 // symmetric/hermitian positive definite
 
 
-TauSolverChol::TauSolverChol(const Matrix& J, const Matrix& b) : _J(J)
+TauSolverChol::TauSolverChol(const Matrix& J, const Matrix& b)
 {
+    _A = J.t() * J;
     _b = J.t() * b;
 }
 
@@ -15,7 +16,8 @@ Matrix TauSolverChol::operator()(double tau)
 {
     Matrix RHS = _b;
     int n = RHS.n_rows;
-    Matrix LHS = (_J.t()*_J) + (square(tau)*eye(n));
+    Matrix LHS = _A;
+    LHS.diag() += square(tau);
 
     int nrhs = RHS.n_cols;
     char uplo = 'U'; // Store upper triangular part (although we won't use it)
