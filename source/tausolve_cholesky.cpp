@@ -15,7 +15,7 @@ Matrix TauSolverChol::operator()(double tau)
 {
     Matrix RHS = _b;
     int n = RHS.n_rows;
-    Matrix LHS = (_J.t()*_J) + (square(tau)*eye(n));
+    Matrix LHS = (_J.t()*_J) + (std::abs(tau)*eye(n));
 
     int nrhs = RHS.n_cols;
     char uplo = 'U'; // Store upper triangular part (although we won't use it)
