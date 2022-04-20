@@ -7,6 +7,8 @@
 #include "lmlsqr.hpp"
 #include "Matrix.hpp"
 
+int TEST_matrix();
+
 int TEST_tausolve_svd();
 int TEST_tausolve_chol();
 int TEST_tausolve_qr();

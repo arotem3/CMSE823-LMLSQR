@@ -5,6 +5,8 @@ int main()
 {
     int n_tests = 0, n_passed = 0;
 
+    std::cout << "Testing Matrix Multiplication\n";
+    n_passed += TEST_matrix(); ++n_tests;
     std::cout << "Testing Tausolve SVD\n";
     n_passed += TEST_tausolve_svd(); ++n_tests;
     std::cout << "Testing Tausolve Cholesky\n";

@@ -1,5 +1,7 @@
 #include "Matrix.hpp"
 
+extern "C" void dgemm_(char * transa, char * transb, int * m, int * n, int * k, double * alpha, double * a, int * lda, double * b, int * ldb, double * beta, double * c, int * ldc);
+
 double dot(unsigned long n, unsigned long stride_x, unsigned long stride_y, const double * x, const double * y)
 {
     double p = 0.0;
@@ -8,24 +10,83 @@ double dot(unsigned long n, unsigned long stride_x, unsigned long stride_y, cons
     return p;
 }
 
-void matmult(double * z, unsigned long m, unsigned long n, unsigned long k, const double * x, const double * y)
+void check_mult(int c_rows, int c_cols, int a_rows, int a_cols, int b_rows, int b_cols)
 {
-    double * zz = z;
-    for (unsigned long c=0; c < k; ++c)
-        for (unsigned long r=0; r < m; ++r, ++zz)
-            (*zz) = dot(n, m, 1ul, x + r, y + n*c);
+    if (c_rows != a_rows || c_cols != b_cols || a_cols != b_rows)
+        throw std::invalid_argument("cannot multiply matrices of size ("
+                + std::to_string(a_rows) + ", " + std::to_string(a_cols)
+                + ") and (" + std::to_string(b_rows) + ", " + std::to_string(b_cols)
+                + ") and produce a matrix of size (" + std::to_string(c_rows) + ", " + std::to_string(c_cols)
+                + ").");
 }
 
 void mult(Matrix& c, const Matrix& a, const Matrix& b)
 {
-    if (c.n_rows != a.n_rows || c.n_cols != b.n_cols || a.n_cols != b.n_rows)
-        throw std::invalid_argument("cannot multiply matrices of size ("
-                + std::to_string(a.n_rows) + ", " + std::to_string(a.n_cols)
-                + ") and (" + std::to_string(b.n_rows) + ", " + std::to_string(b.n_cols)
-                + ") and produce a matrix of size (" + std::to_string(c.n_rows) + ", " + std::to_string(c.n_cols)
-                + ").");
+    check_mult(c.n_rows, c.n_cols, a.n_rows, a.n_cols, b.n_rows, b.n_cols);
     
-    matmult(c.data(), a.n_rows, a.n_cols, b.n_cols, a.data(), b.data());
+    char transa = 'N';
+    char transb = 'N';
+    int m = a.n_rows;
+    int n = b.n_cols;
+    int k = a.n_cols;
+    double alpha = 1.0;
+    int lda = m;
+    int ldb = k;
+    double beta = 0.0;
+    int ldc = c.n_rows;
+    dgemm_(&transa, &transb, &m, &n, &k, &alpha, const_cast<double*>(a.data()), &lda, const_cast<double*>(b.data()), &ldb, &beta, c.data(), &ldc);
+    // matmult(c.data(), a.n_rows, a.n_cols, b.n_cols, a.data(), b.data());
+}
+
+void mult(Matrix& c, const Matrix::MatrixTranspose& a, const Matrix& b)
+{
+    check_mult(c.n_rows, c.n_cols, a.n_rows, a.n_cols, b.n_rows, b.n_cols);
+    
+    char transa = 'T';
+    char transb = 'N';
+    int m = a.n_rows;
+    int n = b.n_cols;
+    int k = a.n_cols;
+    double alpha = 1.0;
+    int lda = k;
+    int ldb = k;
+    double beta = 0.0;
+    int ldc = c.n_rows;
+    dgemm_(&transa, &transb, &m, &n, &k, &alpha, const_cast<double*>(a.data()), &lda, const_cast<double*>(b.data()), &ldb, &beta, c.data(), &ldc);
+}
+
+void mult(Matrix& c, const Matrix& a, const Matrix::MatrixTranspose& b)
+{
+    check_mult(c.n_rows, c.n_cols, a.n_rows, a.n_cols, b.n_rows, b.n_cols);
+    
+    char transa = 'N';
+    char transb = 'T';
+    int m = a.n_rows;
+    int n = b.n_cols;
+    int k = a.n_cols;
+    double alpha = 1.0;
+    int lda = m;
+    int ldb = n;
+    double beta = 0.0;
+    int ldc = c.n_rows;
+    dgemm_(&transa, &transb, &m, &n, &k, &alpha, const_cast<double*>(a.data()), &lda, const_cast<double*>(b.data()), &ldb, &beta, c.data(), &ldc);
+}
+
+void mult(Matrix& c, const Matrix::MatrixTranspose& a, const Matrix::MatrixTranspose& b)
+{
+    check_mult(c.n_rows, c.n_cols, a.n_rows, a.n_cols, b.n_rows, b.n_cols);
+    
+    char transa = 'T';
+    char transb = 'T';
+    int m = a.n_rows;
+    int n = b.n_cols;
+    int k = a.n_cols;
+    double alpha = 1.0;
+    int lda = k;
+    int ldb = n;
+    double beta = 0.0;
+    int ldc = c.n_rows;
+    dgemm_(&transa, &transb, &m, &n, &k, &alpha, const_cast<double*>(a.data()), &lda, const_cast<double*>(b.data()), &ldb, &beta, c.data(), &ldc);
 }
 
 void add(Matrix& c, const Matrix& a, const Matrix& b)
@@ -57,6 +118,27 @@ Matrix operator*(const Matrix& a, const Matrix& b)
     Matrix c(a.n_rows, b.n_cols);
     mult(c, a, b);
 
+    return c;
+}
+
+Matrix operator*(const Matrix::MatrixTranspose& a, const Matrix& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
+    return c;
+}
+
+Matrix operator*(const Matrix& a, const Matrix::MatrixTranspose& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
+    return c;
+}
+
+Matrix operator*(const Matrix::MatrixTranspose& a, const Matrix::MatrixTranspose& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
     return c;
 }
 

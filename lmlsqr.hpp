@@ -105,10 +105,10 @@ class Timer
         t0 = std::chrono::system_clock::now();
     }
 
-    inline long elapsed_time()
+    inline double elapsed_time()
     {
         auto t1 = std::chrono::system_clock::now();
-        std::chrono::milliseconds diff = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0);
+        std::chrono::duration<double> diff = t1 - t0;
         return diff.count();
     }
 

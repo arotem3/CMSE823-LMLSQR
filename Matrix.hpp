@@ -92,49 +92,105 @@ class Matrix
         return *this;
     }
 
-    int size() const
+    inline int size() const
     {
         return _nr * _nc;
     }
 
-    double* data()
+    inline double* data()
     {
         return arr;
     }
 
-    const double* data() const
+    inline const double* data() const
     {
         return arr;
     }
 
-    double& operator[](unsigned long i)
+    inline double& operator[](unsigned long i)
     {
         return arr[i];
     }
 
-    double operator[](unsigned long i) const
+    inline double operator[](unsigned long i) const
     {
         return arr[i];
     }
 
-    double& operator()(unsigned long i, unsigned long j)
+    inline double& operator()(unsigned long i, unsigned long j)
     {
         return arr[i + _nr*j];
     }
 
-    double operator()(unsigned long i, unsigned long j) const
+    inline double operator()(unsigned long i, unsigned long j) const
     {
         return arr[i + _nr*j];
     }
 
-    Matrix t() const
+    class MatrixTranspose
     {
-        Matrix At(_nc, _nr);
+        public:
+        const unsigned long & n_rows = _nr;
+        const unsigned long & n_cols = _nc;
+
+        explicit MatrixTranspose(const double* a, unsigned long nr, unsigned long nc) : arr(a), _nr(nr), _nc(nc) {}
+
+        inline int size() const
+        {
+            return _nr * _nc;
+        }
+
+        inline const double * data() const
+        {
+            return arr;
+        }
+
+        inline double operator()(unsigned long i, unsigned long j) const
+        {
+            return arr[j + _nc*i];
+        }
+
+        private:
+        const double * arr;
+        unsigned long _nr, _nc;
+    };
+
+    Matrix(const MatrixTranspose& At)
+    {
+        _nr = At.n_rows;
+        _nc = At.n_cols;
+        arr = new double[size()];
         for (unsigned long i=0; i < _nr; ++i)
             for (unsigned long j=0; j < _nc; ++j)
-                At(j, i) = (*this)(i,j);
+                arr[i + _nr*j] = At(i, j);
+    }
 
-        return At;
+    Matrix& operator=(const MatrixTranspose& At)
+    {
+        if (size() < At.size())
+        {
+            delete[] arr;
+            arr = new double[size()];
+        }
+
+        _nr = At.n_rows;
+        _nc = At.n_cols;
+        for (unsigned long i=0; i < _nr; ++i)
+            for (unsigned long j=0; j < _nc; ++j)
+                arr[i + _nr*j] = At(i, j);
+
+        return *this;
+    }
+
+    MatrixTranspose t() const
+    {
+        return MatrixTranspose(arr, n_cols, n_rows);
+        // Matrix At(_nc, _nr);
+        // for (unsigned long i=0; i < _nr; ++i)
+        //     for (unsigned long j=0; j < _nc; ++j)
+        //         At(j, i) = (*this)(i,j);
+
+        // return At;
     }
 
     std::string print()
@@ -262,10 +318,16 @@ class Matrix
 };
 
 void mult(Matrix&, const Matrix&, const Matrix&);
+void mult(Matrix&, const Matrix::MatrixTranspose&, const Matrix&);
+void mult(Matrix&, const Matrix&, const Matrix::MatrixTranspose&);
+void mult(Matrix&, const Matrix::MatrixTranspose&, const Matrix::MatrixTranspose&);
 void add(Matrix&, const Matrix&, const Matrix&);
 void subtract(Matrix&, const Matrix&, const Matrix&);
 
 Matrix operator*(const Matrix& a, const Matrix& b);
+Matrix operator*(const Matrix::MatrixTranspose&, const Matrix&);
+Matrix operator*(const Matrix&, const Matrix::MatrixTranspose&);
+Matrix operator*(const Matrix::MatrixTranspose&, const Matrix::MatrixTranspose&);
 Matrix operator*(double c, const Matrix& a);
 Matrix operator-(const Matrix& a, const Matrix& b);
 Matrix operator+(const Matrix& a, const Matrix& b);

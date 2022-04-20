@@ -1,7 +1,7 @@
 #include <lmlsqr.hpp>
 
 template <typename TauSolver>
-long TIMING_trust_solve(int m, int n)
+double TIMING_trust_solve(int m, int n)
 {
     Matrix J = randn(m, n);
     Matrix r = randn(m, 1);
@@ -11,7 +11,7 @@ long TIMING_trust_solve(int m, int n)
 
     Timer clock;
     trust_solve<TauSolver>(J, r, delta, tolerance);
-    long ns = clock.elapsed_time();
+    double seconds = clock.elapsed_time();
 
-    return ns;
+    return seconds;
 }

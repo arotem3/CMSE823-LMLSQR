@@ -4,8 +4,18 @@
 
 int main()
 {
-    int ms[] = {100, 1000, 5000};
+    int ms[] = {100, 500, 1000, 2500, 5000};
     double ratio_n_to_m[] = {0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.};
+
+    std::ofstream fm("ms.txt");
+    for (int m : ms)
+        fm << m << ' ';
+    fm << '\n';
+
+    std::ofstream fratios("ratios.txt");
+    for (double ratio : ratio_n_to_m)
+        fratios << ratio << ' ';
+    fratios << '\n';
 
     std::ofstream fchol("timing_chol.txt");
     std::ofstream fqr("timing_qr.txt");
