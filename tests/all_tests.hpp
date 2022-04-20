@@ -24,11 +24,12 @@ int TEST_trust_solve()
 
     Matrix s = trust_solve<tau_solver>(J, b, delta, tolerance);
     
-    Matrix se = {{-0.02231871816311238, 0.09747756059501878}};
+    Matrix se = {{-0.01099024468912938,0.09939423786957201}};
+
     double tau = 4.755029833554435;
 
-    //bool success = norm(s - se) < 1e-10;
-    bool success = std::abs(norm(s) - delta) < 1e-8;
+    bool success = norm(s - se) < 1e-10;
+    //bool success = std::abs(norm(s) - delta) < 1e-8;
     std::cout << "||s|| = " << norm(s) << "\n";
 
     if (not success) {
