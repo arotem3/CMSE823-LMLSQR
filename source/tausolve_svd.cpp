@@ -49,13 +49,14 @@ TauSolverSVD::TauSolverSVD(const Matrix& J, const Matrix& b)
 // solves diag(s.^2 + tau^2)*x = b where s is a 1d vector, b is a 1d vector.
 Matrix diagonal_solve(const Matrix& s, double tau, const Matrix& b)
 {
-    Matrix x = b;
+    Matrix x(b.size(), 1);
 
     const double * si = s.data();
+    const double * bi = b.data();
     double * xi = x.data();
 
-    for (int i=0; i < x.size(); ++i, ++xi, ++si)
-        (*xi) /= square(*si) + std::abs(tau);
+    for (int i=0; i < x.size(); ++i, ++xi, ++si, ++bi)
+        (*xi) = (*bi) / ( square(*si) + std::abs(tau) );
 
     return x;
 }

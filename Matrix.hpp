@@ -324,23 +324,86 @@ void mult(Matrix&, const Matrix::MatrixTranspose&, const Matrix::MatrixTranspose
 void add(Matrix&, const Matrix&, const Matrix&);
 void subtract(Matrix&, const Matrix&, const Matrix&);
 
-Matrix operator*(const Matrix& a, const Matrix& b);
-Matrix operator*(const Matrix::MatrixTranspose&, const Matrix&);
-Matrix operator*(const Matrix&, const Matrix::MatrixTranspose&);
-Matrix operator*(const Matrix::MatrixTranspose&, const Matrix::MatrixTranspose&);
-Matrix operator*(double c, const Matrix& a);
-Matrix operator-(const Matrix& a, const Matrix& b);
-Matrix operator+(const Matrix& a, const Matrix& b);
-Matrix operator+(const Matrix& a, double c);
+inline Matrix operator*(const Matrix& a, const Matrix& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
+    return c;
+}
+
+inline Matrix operator*(const Matrix::MatrixTranspose& a, const Matrix& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
+    return c;
+}
+
+inline Matrix operator*(const Matrix& a, const Matrix::MatrixTranspose& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
+    return c;
+}
+
+inline Matrix operator*(const Matrix::MatrixTranspose& a, const Matrix::MatrixTranspose& b)
+{
+    Matrix c(a.n_rows, b.n_cols);
+    mult(c, a, b);
+    return c;
+}
+
+inline Matrix operator*(double c, const Matrix& a)
+{
+    Matrix b = a;
+    b *= c;
+    return b;
+}
+
+inline Matrix operator-(const Matrix& a, const Matrix& b)
+{
+    Matrix c(a.n_rows, a.n_cols);
+    subtract(c, a, b);
+    return c;
+}
+
+inline Matrix operator+(const Matrix& a, const Matrix& b)
+{
+    Matrix c(a.n_rows, a.n_cols);
+    add(c, a, b);
+    return c;
+}
+
+inline Matrix operator+(const Matrix& a, double c)
+{
+    Matrix b = a;
+    b += c;
+    return b;
+}
 
 double norm(const Matrix& x);
 double dot(const Matrix& a, const Matrix& b);
 
 Matrix vcat(const Matrix& a, const Matrix& b);
 
-Matrix eye(int n);
-Matrix ones(int m, int n);
-Matrix zeros(int m, int n);
+inline Matrix eye(int n)
+{
+    Matrix I(n,n);
+    I.eye();
+    return I;
+}
+
+inline Matrix ones(int m, int n)
+{
+    Matrix A(m,n);
+    A.fill(1.0);
+    return A;
+}
+
+inline Matrix zeros(int m, int n)
+{
+    return Matrix(m, n);
+}
+
 Matrix randn(int m, int n);
 
 #endif

@@ -76,8 +76,8 @@ Matrix TauSolverQR::operator()(double tau)
     G.fill(0.0);
     G.diag().fill(std::sqrt(std::abs(tau)));
 
-    for (int i=0; i < n; ++i)
-        for (int j=i; j < n; ++j)
+    for (int j=0; j < n; ++j)
+        for (int i=0; i <= j; ++i)
             R(i, j) = QR(i, j);
 
     // givens rotation

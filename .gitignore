@@ -7,3 +7,4 @@ timing_chol.txt
 timing_qr.txt
 timing_svd.txt
 *.txt
+*.png

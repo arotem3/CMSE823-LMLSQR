@@ -113,83 +113,6 @@ void subtract(Matrix& c, const Matrix& a, const Matrix& b)
         (*ci) = (*ai) - (*bi);
 }
 
-Matrix operator*(const Matrix& a, const Matrix& b)
-{
-    Matrix c(a.n_rows, b.n_cols);
-    mult(c, a, b);
-
-    return c;
-}
-
-Matrix operator*(const Matrix::MatrixTranspose& a, const Matrix& b)
-{
-    Matrix c(a.n_rows, b.n_cols);
-    mult(c, a, b);
-    return c;
-}
-
-Matrix operator*(const Matrix& a, const Matrix::MatrixTranspose& b)
-{
-    Matrix c(a.n_rows, b.n_cols);
-    mult(c, a, b);
-    return c;
-}
-
-Matrix operator*(const Matrix::MatrixTranspose& a, const Matrix::MatrixTranspose& b)
-{
-    Matrix c(a.n_rows, b.n_cols);
-    mult(c, a, b);
-    return c;
-}
-
-Matrix operator*(double c, const Matrix& a)
-{
-    Matrix b = a;
-    b *= c;
-    // double * bij = b.data();
-    // for (int i=0; i < b.size(); ++i, ++bij)
-    //     (*bij) *= c;
-    
-    return b;
-}
-
-Matrix operator-(const Matrix& a, const Matrix& b)
-{
-    Matrix c(a.n_rows, a.n_cols);
-    subtract(c, a, b);
-    // Matrix c = a;
-    // double * ci = c.data();
-    // const double * bi = b.data();
-    // for (int i=0; i < c.size(); ++i, ++ci, ++bi)
-    //     (*ci) -= (*bi);
-    
-    return c;
-}
-
-Matrix operator+(const Matrix& a, const Matrix& b)
-{
-    Matrix c(a.n_rows, a.n_cols);
-    add(c, a, b);
-    // Matrix c = a;
-    // double * ci = c.data();
-    // const double * bi = b.data();
-    // for (int i=0; i < c.size(); ++i, ++ci, ++bi)
-    //     (*ci) += (*bi);
-    
-    return c;
-}
-
-Matrix operator+(const Matrix& a, double c)
-{
-    Matrix b = a;
-    b += c;
-
-    // for (double * bi = b.data(); bi != b.data() + b.size(); ++bi)
-    //     (*bi) += c;
-    
-    return b;
-}
-
 Matrix::MatrixDiagonalView& Matrix::MatrixDiagonalView::operator+=(const Matrix& B)
 {
     int n = std::min(_nr, _nc);
@@ -241,34 +164,6 @@ Matrix vcat(const Matrix& a, const Matrix& b)
     return c;
 }
 
-Matrix eye(int n)
-{
-    Matrix I(n,n);
-    I.eye();
-    // I.diag().fill(1.0);
-
-    // double * Iij = I.data();
-
-    // for (int i=0; i < n; ++i, Iij += n)
-    //     *(Iij + i) = 1.0;
-    
-    return I;
-}
-
-Matrix ones(int m, int n)
-{
-    Matrix x(m,n);
-    x.fill(1.0);
-    // std::fill_n(x.data(), x.size(), 1.0);
-
-    return x;   
-}
-
-Matrix zeros(int m, int n)
-{
-    return Matrix(m,n);
-}
-
 Matrix randn(int m, int n)
 {
     Matrix A(m,n);
@@ -276,8 +171,7 @@ Matrix randn(int m, int n)
     std::default_random_engine generator;
     std::normal_distribution<double> distribution(0., 1.);
 
-    for (int i=0; i < A.size(); ++i)
-        A[i] = distribution(generator);
+    A.for_each([&](double& a) -> void {a = distribution(generator);});
 
     return A;
 }

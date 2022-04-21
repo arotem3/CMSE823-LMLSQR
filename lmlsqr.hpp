@@ -75,8 +75,8 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
     int i = 0;
     while (i < max_iter) { 
         s = my_tau_solve(tau);
-        if (norm(s) <= delta)
-            break;
+        // if (norm(s) <= delta)
+            // break;
         s_forward = my_tau_solve(tau + eps);
 
         g = (1/norm(s)) - (1/delta);
@@ -88,11 +88,12 @@ Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
         tau_old = tau;
         tau = tau_old - (g/g_derivative);
 
-        if (std::abs(tau-tau_old) < tolerance)
-            break;
+        // if (std::abs(/tau-tau_old) < tolerance)
+            // break;
 
         ++i;
     }
+    // std::cout << i << '\n';
     return s;
 
 }
@@ -102,18 +103,18 @@ class Timer
     public:
     inline Timer()
     {
-        t0 = std::chrono::system_clock::now();
+        t0 = std::chrono::high_resolution_clock::now();
     }
 
     inline double elapsed_time()
     {
-        auto t1 = std::chrono::system_clock::now();
+        auto t1 = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> diff = t1 - t0;
         return diff.count();
     }
 
     private:
-    std::chrono::time_point<std::chrono::system_clock> t0;
+    std::chrono::_V2::high_resolution_clock::time_point t0;
 };
 
 #endif
