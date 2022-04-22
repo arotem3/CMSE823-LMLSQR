@@ -1,6 +1,6 @@
 CXX = g++
 FLAGS = -std=c++20 -O3
-LIBS = -llapack -lblas
+LIBS = -llapack -lopenblas -lgfortran
 
 SOURCE = $(wildcard source/*.cpp)
 S_OBJ = $(patsubst %.cpp, build/%.o, $(SOURCE))

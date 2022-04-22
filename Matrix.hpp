@@ -14,9 +14,6 @@ inline double square(double x)
     return x*x;
 }
 
-double dot(unsigned long n, unsigned long stride_x, unsigned long stride_y, const double * x, const double * y);
-void matmult(double * z, unsigned long m, unsigned long n, unsigned long k, const double * x, const double * y);
-
 class Matrix
 {
     public:
@@ -67,7 +64,6 @@ class Matrix
 
     Matrix& operator=(const Matrix& mat)
     {
-        // delete[] arr;
         if (size() < mat.size())
         {
             delete[] arr;
@@ -75,7 +71,6 @@ class Matrix
         }
         _nr = mat.n_rows;
         _nc = mat.n_cols;
-        // arr = new double[mat.size()];
         std::copy_n(mat.arr, mat.size(), arr);
 
         return *this;
@@ -112,7 +107,7 @@ class Matrix
         return arr[i];
     }
 
-    inline double operator[](unsigned long i) const
+    inline const double& operator[](unsigned long i) const
     {
         return arr[i];
     }
@@ -122,7 +117,7 @@ class Matrix
         return arr[i + _nr*j];
     }
 
-    inline double operator()(unsigned long i, unsigned long j) const
+    inline const double& operator()(unsigned long i, unsigned long j) const
     {
         return arr[i + _nr*j];
     }
@@ -145,7 +140,7 @@ class Matrix
             return arr;
         }
 
-        inline double operator()(unsigned long i, unsigned long j) const
+        inline const double& operator()(unsigned long i, unsigned long j) const
         {
             return arr[j + _nc*i];
         }
@@ -167,30 +162,33 @@ class Matrix
 
     Matrix& operator=(const MatrixTranspose& At)
     {
-        if (size() < At.size())
+        if (At.data() == arr || size() < At.size())
         {
+            double * a = new double[At.size()];
+
+            for (unsigned long i=0; i < At.n_rows; ++i)
+                for (unsigned long j=0; j < At.n_cols; ++j)
+                    a[i + At.n_rows*j] = At(i, j);
+
             delete[] arr;
-            arr = new double[size()];
+            arr = a;
+        }
+        else
+        {
+            for (unsigned long i=0; i < At.n_rows; ++i)
+                for (unsigned long j=0; j < At.n_cols; ++j)
+                    arr[i + At.n_rows*j] = At(i, j);
         }
 
         _nr = At.n_rows;
         _nc = At.n_cols;
-        for (unsigned long i=0; i < _nr; ++i)
-            for (unsigned long j=0; j < _nc; ++j)
-                arr[i + _nr*j] = At(i, j);
-
+        
         return *this;
     }
 
-    MatrixTranspose t() const
+    inline MatrixTranspose t() const
     {
         return MatrixTranspose(arr, n_cols, n_rows);
-        // Matrix At(_nc, _nr);
-        // for (unsigned long i=0; i < _nr; ++i)
-        //     for (unsigned long j=0; j < _nc; ++j)
-        //         At(j, i) = (*this)(i,j);
-
-        // return At;
     }
 
     std::string print()
@@ -227,9 +225,6 @@ class Matrix
     inline Matrix& operator*=(double c)
     {
         std::for_each_n(arr, size(), [&](double& a) -> void {a *= c;});
-        // for (double * a = arr; a != arr + size(); ++a)
-            // (*a) *= c;
-
         return *this;
     }
 
@@ -378,6 +373,13 @@ inline Matrix operator+(const Matrix& a, double c)
     Matrix b = a;
     b += c;
     return b;
+}
+
+inline Matrix operator-(const Matrix& a)
+{
+    Matrix negative_a = a;
+    negative_a.for_each([](double& x) -> void {x = -x;});
+    return negative_a;
 }
 
 double norm(const Matrix& x);

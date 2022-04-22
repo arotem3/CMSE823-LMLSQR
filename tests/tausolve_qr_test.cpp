@@ -13,7 +13,7 @@ int TEST_tausolve_qr()
 
     Matrix b = {{1., 1., 1.}};
 
-    Matrix xe = {{0.637427298586004, 1.342770721215976}};
+    Matrix xe = {{-0.637427298586004, -1.342770721215976}};
 
     TauSolverQR solver(J, b);
     Matrix x = solver(tau);

@@ -21,16 +21,14 @@ int TEST_trust_solve()
     Matrix b = {{1., 1., 1.}};
 
     double delta = 0.1;
-    double tolerance = 1e-11;
 
-
-    Matrix s = trust_solve<tau_solver>(J, b, delta, tolerance);
+    Matrix s = trust_solve<tau_solver>(J, b, delta);
     
-    Matrix se = {{-0.01099024468912938,0.09939423786957201}};
+    Matrix se = {{0.01099024468912938,-0.09939423786957201}};
 
     double tau = 4.755029833554435;
 
-    bool success = norm(s - se) < 1e-10;
+    bool success = norm(s - se) < 1e-8;
     //bool success = std::abs(norm(s) - delta) < 1e-8;
     //std::cout << "||s|| = " << norm(s) << "\n";
 

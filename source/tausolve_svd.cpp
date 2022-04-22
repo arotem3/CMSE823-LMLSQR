@@ -18,35 +18,32 @@ TauSolverSVD::TauSolverSVD(const Matrix& J, const Matrix& b)
     int ldvt = n;
 
     int lwork = -1;
-    double * work = new double[5*m];
+    double wt;
 
     int info = 0;
 
     // query for work variables
-    dgesvd_(&jobu, &jobvt, &m, &n, U.data(), &lda, s.data(), nullptr, &ldu, Vt.data(), &ldvt, work, &lwork, &info);
+    dgesvd_(&jobu, &jobvt, &m, &n, U.data(), &lda, s.data(), nullptr, &ldu, Vt.data(), &ldvt, &wt, &lwork, &info);
 
-    lwork = work[0];
-    if (lwork > 5*m)
-    {
-        delete[] work;
-        work = new double[lwork];
-    }
+    lwork = wt;
+    Matrix work(lwork, 1);
 
     // actually compute svd
-    dgesvd_(&jobu, &jobvt, &m, &n, U.data(), &lda, s.data(), nullptr, &ldu, Vt.data(), &ldvt, work, &lwork, &info);
+    dgesvd_(&jobu, &jobvt, &m, &n, U.data(), &lda, s.data(), nullptr, &ldu, Vt.data(), &ldvt, work.data(), &lwork, &info);
 
     if (info != 0)
         throw std::runtime_error("failed to compute singular value decomposition.");
 
-    delete[] work;
-
-    // compute s * U.t() * b
+    // compute -s * U.t() * b
     _b = U.t() * b;
     for (double * bi = _b.data(), * si =  s.data(); bi != _b.data() + n; ++bi, ++si)
-        (*bi) *= (*si);
+        (*bi) *= -(*si);
+
+    // square s
+    s.for_each([](double& si) -> void {si = square(si);});
 }
 
-// solves diag(s.^2 + tau^2)*x = b where s is a 1d vector, b is a 1d vector.
+// solves diag(s + tau)*x = b where s is a 1d vector, b is a 1d vector.
 Matrix diagonal_solve(const Matrix& s, double tau, const Matrix& b)
 {
     Matrix x(b.size(), 1);
@@ -56,7 +53,7 @@ Matrix diagonal_solve(const Matrix& s, double tau, const Matrix& b)
     double * xi = x.data();
 
     for (int i=0; i < x.size(); ++i, ++xi, ++si, ++bi)
-        (*xi) = (*bi) / ( square(*si) + std::abs(tau) );
+        (*xi) = (*bi) / ( (*si) + tau );
 
     return x;
 }

@@ -7,7 +7,7 @@
 #include <chrono>
 #include "Matrix.hpp"
 
-// computes the solution to (J'*J + tau^2 * I) * x = b using Cholesky
+// computes the solution to (J'*J + |tau| * I) * x = -J'*b using Cholesky
 // decomposition
 class TauSolverChol
 {
@@ -21,7 +21,7 @@ class TauSolverChol
     Matrix _b;
 };
 
-// compute the solution to (J'*J + tau^2 *I) * x = b using SVD
+// compute the solution to (J'*J + |tau| *I) * x = -J'*b using SVD
 class TauSolverSVD
 {
     public:
@@ -35,7 +35,7 @@ class TauSolverSVD
     Matrix _b;
 };
 
-// compute solution to (J'*J + tau^2 * I) * x = b using modified QR
+// compute solution to (J'*J + |tau| * I) * x = -J'*b using modified QR
 class TauSolverQR
 {
     public:
@@ -44,77 +44,72 @@ class TauSolverQR
     Matrix operator()(double tau);
 
     private:
-    Matrix QR;
-    Matrix qr_tau;
     Matrix R;
+    Matrix R1;
     Matrix G;
-    Matrix b1;
-    Matrix b2;
-    Matrix _b;
+    int _n;
 };
 
-//
+// computes solution to (J'*J + |tau| * I) * x = -J'*b by naively recomputing
+// the QR decomposition for all tau.
+class TauSolverQRfull
+{
+    public:
+    TauSolverQRfull(const Matrix& J, const Matrix& b);
+
+    Matrix operator()(double tau);
+
+    private:
+    const Matrix& _J;
+    const Matrix& _b;
+    Matrix QR;
+    Matrix b1;
+    Matrix work;
+    int lwork;
+};
+
+// computes solution to trust-region problem minimize{ 0.5*||J*s + r||^2 } subject
+// to { ||s|| == delta } using the secant method on the Lagrangian dual variable.
 template <class tau_solver>
-Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance)
+Matrix trust_solve(Matrix &J, Matrix &r, double delta, double tolerance = 1e-8, int max_iter = 10)
 {
     tau_solver my_tau_solve(J, r);
 
-    double tau = 0;
-    double tau_old;
-    //double eps = std::sqrt(std::numeric_limits<double>::epsilon());
-    double eps = 1e-5;
+    double tau1 = 0, tau2 = 1e-5;
+    double g1, g2, dg;
+    double ns;
 
-    double g;
-    double g_forward;
-    double g_derivative;
+    Matrix s1 = my_tau_solve( std::abs(tau1) );
+    ns = norm(s1);
+    
+    if (ns <= delta)
+        return s1;
 
-    Matrix s;
-    Matrix s_forward;
+    g1 = (1.0/ns) - (1.0/delta);
 
-    int max_iter = 10;
-    int i = 0;
-    while (i < max_iter) { 
-        s = my_tau_solve(tau);
-        // if (norm(s) <= delta)
-            // break;
-        s_forward = my_tau_solve(tau + eps);
+    for (int i=0; i < max_iter; ++i)
+    {
+        Matrix s2 = my_tau_solve( std::abs(tau2) );
+        ns = norm(s2);
 
-        g = (1/norm(s)) - (1/delta);
-        g_forward = (1/norm(s_forward)) - (1/delta);
-        g_derivative = (g_forward-g)/eps;
+        if (std::abs(ns - delta) < tolerance)
+            return s2;
 
-        //std::cout << "Iter " << i << "; tau = " << tau << "; g' = " << g_derivative << "\n";
+        g2 = (1.0/ns) - (1.0/delta);
+        dg = (g2 - g1) / (tau2 - tau1);
 
-        tau_old = tau;
-        tau = tau_old - (g/g_derivative);
-
-        // if (std::abs(/tau-tau_old) < tolerance)
-            // break;
-
-        ++i;
+        // If tau2 is better than tau1, keep tau2 and throw away tau1.
+        // Otherwise, keep tau1 and try a new tau2.
+        if (std::abs(g2) < std::abs(g1))
+        {
+            tau1 = tau2;
+            s1 = std::move(s2);
+            g1 = g2;
+        }
+        tau2 -= (g2 / dg);
     }
-    // std::cout << i << '\n';
-    return s;
 
+    return s1;
 }
-
-class Timer
-{
-    public:
-    inline Timer()
-    {
-        t0 = std::chrono::high_resolution_clock::now();
-    }
-
-    inline double elapsed_time()
-    {
-        auto t1 = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> diff = t1 - t0;
-        return diff.count();
-    }
-
-    private:
-    std::chrono::_V2::high_resolution_clock::time_point t0;
-};
 
 #endif

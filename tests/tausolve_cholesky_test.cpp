@@ -13,7 +13,7 @@ int TEST_tausolve_chol()
 
     Matrix b = {{1., 1., 1.}};
 
-    Matrix xe = {{0.637427298586004, 1.342770721215976}};
+    Matrix xe = {{-0.637427298586004, -1.342770721215976}};
 
     TauSolverChol solver(J, b);
 

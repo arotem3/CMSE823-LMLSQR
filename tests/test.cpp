@@ -19,6 +19,8 @@ int main()
     n_passed += TEST_trust_solve<TauSolverChol>(); ++n_tests;
     std::cout << "Testing Trust Solve QR\n";
     n_passed += TEST_trust_solve<TauSolverQR>(); ++n_tests;
+    std::cout << "Testing Trust Solve QRfull\n";
+    n_passed += TEST_trust_solve<TauSolverQRfull>(); ++n_tests;
 
     std::cout << n_passed << " / " << n_tests << " tests completed successfully.\n";
 
